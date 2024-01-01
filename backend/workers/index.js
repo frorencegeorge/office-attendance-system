@@ -1,3 +1,4 @@
+
 // Import required modules
 const express = require("express");
 const mysql = require("mysql2/promise");
@@ -32,7 +33,7 @@ app.listen(config.PORT, async () => {
   console.log("Server listening on port " + config.PORT);
 });
 
-// Define a POST route for employee registration
+// Define API POST route for employee registration
 app.post("/reg_employee", async (req, res) => {
     const { first_name, middle_name, surname, dob, user_id, username } = req.body;
 
@@ -95,7 +96,7 @@ function unique() {
   return id;
 }
 
-// Function to generate a random password
+// Function to generate a random password for use in employee_account
 function generatePassword() {
   const length = 8;
   const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -106,3 +107,49 @@ function generatePassword() {
   }
   return password;
 }
+
+
+
+////api for sign  out
+app.post('/signout', async (req, res) => {
+  try {
+    const { employee_reg } = req.body;
+
+    // Check if the employee_reg exists in the employee_account table
+    const [employee] = await pool.query('SELECT * FROM employee_account WHERE employee_reg = ?', [employee_reg]);
+
+    if (employee.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    // Get the current timestamp in Tanzania's timezone and format it for MySQL
+    const timestamp = moment().tz('Africa/Dar_es_Salaam').format('YYYY-MM-DD HH:mm:ss');
+
+    // Update the 'sign_in' table with the sign-out time
+    const [result] = await pool.query('UPDATE sign_in SET time_out = ? WHERE employee_reg = ? AND time_out IS NULL', [timestamp, employee_reg]);
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ error: 'No active sign-in record found for the employee' });
+    }
+
+    res.json({ message: 'Time-out recorded successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while processing your request' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
