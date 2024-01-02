@@ -34,7 +34,7 @@ app.post('/signout', async (req, res) => {
             return res.status(404).json({ error: 'Employee not found in the system' });
         }
 
-        // Get the current timestamp in Tanzania's time and format it for MySQL
+        // timestamp in Tanzania's time and format it for MySQL
         const timestamp = moment().tz('Africa/Dar_es_Salaam').format('YYYY-MM-DD HH:mm:ss');
 
         // Update data in the 'sign_in' table for the employee to sign_out
